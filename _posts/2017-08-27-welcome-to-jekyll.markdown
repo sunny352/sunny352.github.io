@@ -2,6 +2,6 @@
 layout: post
 title:  "欢迎"
 date:   2017-08-27 20:31:57 +0800
-categories: jekyll update
+categories: blog update
 ---
 初始化一个blog，我很懒，可能更新不了什么东西。
