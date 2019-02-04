@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>websocket 实例：go client | 小明的记录</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="websocket 实例：go client" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="记录一些我自己会的东西，免得以后忘记了" />
+<meta property="og:description" content="记录一些我自己会的东西，免得以后忘记了" />
+<link rel="canonical" href="http://0.0.0.0:4000/2019/02/04/websocket-go-client.html" />
+<meta property="og:url" content="http://0.0.0.0:4000/2019/02/04/websocket-go-client.html" />
+<meta property="og:site_name" content="小明的记录" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2019-02-04T06:22:35-06:00" />
+<script type="application/ld+json">
+{"@type":"BlogPosting","headline":"websocket 实例：go client","dateModified":"2019-02-04T06:22:35-06:00","datePublished":"2019-02-04T06:22:35-06:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://0.0.0.0:4000/2019/02/04/websocket-go-client.html"},"url":"http://0.0.0.0:4000/2019/02/04/websocket-go-client.html","description":"记录一些我自己会的东西，免得以后忘记了","@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://0.0.0.0:4000/feed.xml" title="小明的记录" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">小明的记录</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">关于我</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">websocket 实例：go client</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2019-02-04T06:22:35-06:00" itemprop="datePublished">Feb 4, 2019
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <!-- # websocket 实例：go client -->
+
+<blockquote>
+  <p>go 语言中 websocket 的客户端示例。<br />
+具体的示例代码在👉<a href="https://github.com/sunny352/Example_Websocket">这里</a>👈</p>
+</blockquote>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span><span class="x"> </span><span class="n">main</span><span class="x">
+
+</span><span class="k">import</span><span class="x"> </span><span class="p">(</span><span class="x">
+	</span><span class="s">"fmt"</span><span class="x">
+	</span><span class="s">"github.com/gorilla/websocket"</span><span class="c">//这里使用的是 gorilla 的 websocket 库</span><span class="x">
+	</span><span class="s">"log"</span><span class="x">
+	</span><span class="s">"time"</span><span class="x">
+</span><span class="p">)</span><span class="x">
+
+</span><span class="k">func</span><span class="x"> </span><span class="n">main</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="c">//创建一个拨号器，也可以用默认的 websocket.DefaultDialer</span><span class="x">
+	</span><span class="n">dialer</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">websocket</span><span class="o">.</span><span class="n">Dialer</span><span class="p">{}</span><span class="x">
+	</span><span class="c">//向服务器发送连接请求，websocket 统一使用 ws://，默认端口和http一样都是80</span><span class="x">
+	</span><span class="n">connect</span><span class="p">,</span><span class="x"> </span><span class="n">_</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">dialer</span><span class="o">.</span><span class="n">Dial</span><span class="p">(</span><span class="s">"ws://127.0.0.1/"</span><span class="p">,</span><span class="x"> </span><span class="no">nil</span><span class="p">)</span><span class="x">
+	</span><span class="k">if</span><span class="x"> </span><span class="no">nil</span><span class="x"> </span><span class="o">!=</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="n">log</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="x">
+		</span><span class="k">return</span><span class="x">
+	</span><span class="p">}</span><span class="x">
+	</span><span class="c">//离开作用域关闭连接，go 的常规操作</span><span class="x">
+	</span><span class="k">defer</span><span class="x"> </span><span class="n">connect</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span><span class="x">
+
+	</span><span class="c">//定时向客户端发送数据</span><span class="x">
+	</span><span class="k">go</span><span class="x"> </span><span class="n">tickWriter</span><span class="p">(</span><span class="n">connect</span><span class="p">)</span><span class="x">
+
+	</span><span class="c">//启动数据读取循环，读取客户端发送来的数据</span><span class="x">
+	</span><span class="k">for</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="c">//从 websocket 中读取数据</span><span class="x">
+		</span><span class="c">//messageType 消息类型，websocket 标准</span><span class="x">
+		</span><span class="c">//messageData 消息数据</span><span class="x">
+		</span><span class="n">messageType</span><span class="p">,</span><span class="x"> </span><span class="n">messageData</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">connect</span><span class="o">.</span><span class="n">ReadMessage</span><span class="p">()</span><span class="x">
+		</span><span class="k">if</span><span class="x"> </span><span class="no">nil</span><span class="x"> </span><span class="o">!=</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="p">{</span><span class="x">
+			</span><span class="n">log</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="x">
+			</span><span class="k">break</span><span class="x">
+		</span><span class="p">}</span><span class="x">
+		</span><span class="k">switch</span><span class="x"> </span><span class="n">messageType</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="k">case</span><span class="x"> </span><span class="n">websocket</span><span class="o">.</span><span class="n">TextMessage</span><span class="o">:</span><span class="c">//文本数据</span><span class="x">
+			</span><span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="kt">string</span><span class="p">(</span><span class="n">messageData</span><span class="p">))</span><span class="x">
+		</span><span class="k">case</span><span class="x"> </span><span class="n">websocket</span><span class="o">.</span><span class="n">BinaryMessage</span><span class="o">:</span><span class="c">//二进制数据</span><span class="x">
+			</span><span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">messageData</span><span class="p">)</span><span class="x">
+		</span><span class="k">case</span><span class="x"> </span><span class="n">websocket</span><span class="o">.</span><span class="n">CloseMessage</span><span class="o">:</span><span class="c">//关闭</span><span class="x">
+		</span><span class="k">case</span><span class="x"> </span><span class="n">websocket</span><span class="o">.</span><span class="n">PingMessage</span><span class="o">:</span><span class="c">//Ping</span><span class="x">
+		</span><span class="k">case</span><span class="x"> </span><span class="n">websocket</span><span class="o">.</span><span class="n">PongMessage</span><span class="o">:</span><span class="c">//Pong</span><span class="x">
+		</span><span class="k">default</span><span class="o">:</span><span class="x">
+
+		</span><span class="p">}</span><span class="x">
+	</span><span class="p">}</span><span class="x">
+</span><span class="p">}</span><span class="x">
+
+</span><span class="k">func</span><span class="x"> </span><span class="n">tickWriter</span><span class="p">(</span><span class="n">connect</span><span class="x"> </span><span class="o">*</span><span class="n">websocket</span><span class="o">.</span><span class="n">Conn</span><span class="p">)</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="k">for</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="c">//向客户端发送类型为文本的数据</span><span class="x">
+		</span><span class="n">err</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">connect</span><span class="o">.</span><span class="n">WriteMessage</span><span class="p">(</span><span class="n">websocket</span><span class="o">.</span><span class="n">TextMessage</span><span class="p">,</span><span class="x"> </span><span class="p">[]</span><span class="kt">byte</span><span class="p">(</span><span class="s">"from client to server"</span><span class="p">))</span><span class="x">
+		</span><span class="k">if</span><span class="x"> </span><span class="no">nil</span><span class="x"> </span><span class="o">!=</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="p">{</span><span class="x">
+			</span><span class="n">log</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="x">
+			</span><span class="k">break</span><span class="x">
+		</span><span class="p">}</span><span class="x">
+		</span><span class="c">//休息一秒</span><span class="x">
+		</span><span class="n">time</span><span class="o">.</span><span class="n">Sleep</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">Second</span><span class="p">)</span><span class="x">
+	</span><span class="p">}</span><span class="x">
+</span><span class="p">}</span><span class="x">
+</span></code></pre></div></div>
+
+  </div><a class="u-url" href="/2019/02/04/websocket-go-client.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">小明的记录</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">小明的记录</li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/sunny352"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">sunny352</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>记录一些我自己会的东西，免得以后忘记了
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
