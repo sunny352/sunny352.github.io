@@ -52,78 +52,8 @@
   <p>以下示例基于egret5.2.13</p>
 </blockquote>
 
-<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nx">WSNet</span> <span class="p">{</span>
-    <span class="c1">//单例，方便使用</span>
-    <span class="kr">public</span> <span class="kr">static</span> <span class="nx">Inst</span><span class="p">():</span> <span class="nx">WSNet</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="p">(</span><span class="kc">null</span> <span class="o">==</span> <span class="nx">WSNet</span><span class="p">.</span><span class="nx">_inst</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">WSNet</span><span class="p">.</span><span class="nx">_inst</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">WSNet</span><span class="p">();</span>
-        <span class="p">}</span>
-        <span class="k">return</span> <span class="nx">WSNet</span><span class="p">.</span><span class="nx">_inst</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="kr">private</span> <span class="kr">static</span> <span class="nx">_inst</span><span class="p">:</span> <span class="nx">WSNet</span><span class="p">;</span>
+<script src="https://gist.github.com/sunny352/4356898c64bac3bda094f1b003474516.js"></script>
 
-    <span class="c1">//websocket连接对象</span>
-    <span class="kr">private</span> <span class="nx">socket</span><span class="p">:</span> <span class="nx">egret</span><span class="p">.</span><span class="nx">WebSocket</span><span class="p">;</span>
-    <span class="c1">//构造函数</span>
-    <span class="kd">constructor</span><span class="p">()</span> <span class="p">{</span>
-        <span class="k">this</span><span class="p">.</span><span class="nx">socket</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">egret</span><span class="p">.</span><span class="nx">WebSocket</span><span class="p">();</span>
-        <span class="c1">//设置websocket运行模式为字符串模式，方便进行json序列化</span>
-        <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">type</span> <span class="o">=</span> <span class="nx">egret</span><span class="p">.</span><span class="nx">WebSocket</span><span class="p">.</span><span class="nx">TYPE_STRING</span><span class="p">;</span>
-        <span class="c1">//添加收到消息响应</span>
-        <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="nx">egret</span><span class="p">.</span><span class="nx">ProgressEvent</span><span class="p">.</span><span class="nx">SOCKET_DATA</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">onReceive</span><span class="p">,</span> <span class="k">this</span><span class="p">);</span>
-        <span class="c1">//添加连接成功响应</span>
-        <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="nx">egret</span><span class="p">.</span><span class="nx">Event</span><span class="p">.</span><span class="nx">CONNECT</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">onConnected</span><span class="p">,</span> <span class="k">this</span><span class="p">);</span>
-        <span class="c1">//添加断开连接响应</span>
-        <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="nx">egret</span><span class="p">.</span><span class="nx">Event</span><span class="p">.</span><span class="nx">CLOSE</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">onDisconnected</span><span class="p">,</span> <span class="k">this</span><span class="p">);</span>
-        <span class="c1">//添加网络IO错误响应</span>
-        <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="nx">egret</span><span class="p">.</span><span class="nx">IOErrorEvent</span><span class="p">.</span><span class="nx">IO_ERROR</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">onError</span><span class="p">,</span> <span class="k">this</span><span class="p">);</span>
-    <span class="p">}</span>
-
-    <span class="c1">//收到消息的回调</span>
-    <span class="kr">private</span> <span class="nx">receiveCallback</span><span class="p">:</span> <span class="nb">Function</span><span class="p">;</span>
-    <span class="c1">//收到消息的回调对象</span>
-    <span class="kr">private</span> <span class="nx">receiveThisObject</span><span class="p">:</span> <span class="nx">any</span><span class="p">;</span>
-    <span class="c1">//设置收到消息的回调</span>
-    <span class="kr">public</span> <span class="nx">setReceiveCallback</span><span class="p">(</span><span class="nx">callback</span><span class="p">:</span> <span class="nb">Function</span><span class="p">,</span> <span class="nx">thisObject</span><span class="p">:</span> <span class="nx">any</span><span class="p">):</span> <span class="k">void</span> <span class="p">{</span>
-        <span class="k">this</span><span class="p">.</span><span class="nx">receiveCallback</span> <span class="o">=</span> <span class="nx">callback</span><span class="p">;</span>
-        <span class="k">this</span><span class="p">.</span><span class="nx">receiveThisObject</span> <span class="o">=</span> <span class="nx">thisObject</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="c1">//连接到服务器，这里使用url方式进行连接，即标准的websocket连接方式</span>
-    <span class="kr">public</span> <span class="nx">connect</span><span class="p">(</span><span class="na">url</span><span class="p">:</span> <span class="nx">string</span><span class="p">):</span> <span class="k">void</span> <span class="p">{</span>
-        <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">connectByUrl</span><span class="p">(</span><span class="nx">url</span><span class="p">);</span>
-    <span class="p">}</span>
-    <span class="c1">//断开连接</span>
-    <span class="kr">public</span> <span class="nx">disconnect</span><span class="p">():</span> <span class="k">void</span> <span class="p">{</span>
-        <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
-    <span class="p">}</span>
-    <span class="c1">//发送消息到服务器，这里会序列化为json</span>
-    <span class="kr">public</span> <span class="nx">send</span><span class="p">(</span><span class="na">obj</span><span class="p">:</span> <span class="nx">any</span><span class="p">):</span> <span class="k">void</span> <span class="p">{</span>
-        <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">writeUTF</span><span class="p">(</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">obj</span><span class="p">))</span>
-    <span class="p">}</span>
-
-    <span class="c1">//连接成功</span>
-    <span class="kr">private</span> <span class="nx">onConnected</span><span class="p">():</span> <span class="k">void</span> <span class="p">{</span>
-        <span class="nx">egret</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"on connect"</span><span class="p">);</span>
-    <span class="p">}</span>
-    <span class="c1">//断开连接</span>
-    <span class="kr">private</span> <span class="nx">onDisconnected</span><span class="p">():</span> <span class="k">void</span> <span class="p">{</span>
-        <span class="nx">egret</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"on disconnect"</span><span class="p">)</span>
-    <span class="p">}</span>
-    <span class="c1">//收到消息，这里会将收到的消息当作json文本并转换为对象提交给之前设置的收到消息的回调中去</span>
-    <span class="kr">private</span> <span class="nx">onReceive</span><span class="p">(</span><span class="na">e</span><span class="p">:</span> <span class="nx">egret</span><span class="p">.</span><span class="nx">Event</span><span class="p">):</span> <span class="k">void</span> <span class="p">{</span>
-        <span class="kd">var</span> <span class="nx">jsonStr</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">socket</span><span class="p">.</span><span class="nx">readUTF</span><span class="p">();</span>
-        <span class="k">if</span> <span class="p">(</span><span class="kc">null</span> <span class="o">==</span> <span class="k">this</span><span class="p">.</span><span class="nx">receiveCallback</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">return</span><span class="p">;</span>
-        <span class="p">}</span>
-        <span class="kd">var</span> <span class="nx">jsonObj</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">jsonStr</span><span class="p">);</span>
-        <span class="k">this</span><span class="p">.</span><span class="nx">receiveCallback</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">receiveThisObject</span><span class="p">,</span> <span class="nx">jsonObj</span><span class="p">);</span>
-    <span class="p">}</span>
-    <span class="c1">//错误处理</span>
-    <span class="kr">private</span> <span class="nx">onError</span><span class="p">():</span> <span class="k">void</span> <span class="p">{</span>
-        <span class="nx">egret</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"on error"</span><span class="p">)</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
 
   </div><a class="u-url" href="/2019/02/10/websocket-egret-typescript.html" hidden></a>
 </article>
