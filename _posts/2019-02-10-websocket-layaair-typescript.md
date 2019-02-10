@@ -1,17 +1,18 @@
 ---
 layout: post
-title:  "websocket 实例：egret 使用typescript"
-date: 2019-02-10 20:10:27 +0800
-tags: [websocket, egret, client, typescript]
+title:  "websocket 实例：LayaAir 使用typescript"
+date: 2019-02-10 21:17:21 +0800
+tags: [websocket, LayaAir, client, typescript]
 ---
 
-<!-- # websocket 实例：egret 使用typescript -->
+<!-- # websocket 实例：LayaAir 使用typescript -->
 
-使用egret引擎开发websocket只需简单的添加几个事件响应即可，无需手动添加线程或循环<br>
-> 以下示例基于egret5.2.13
+使用LayaAir引擎开发websocket的流程和Egret类似，细节稍有不同。<br>
+LayaAir封装的websocket可发送的数据类型只有两种：string和ArrayBuffer，分别对应文本传输方式和二进制传输方式，所以无需手动设置消息发送方式<br>
+> 以下示例基于LayaAir2.0.0
 
 ```typescript
-class WSNet {
+export default class WSNet {
     //单例，方便使用
     public static Inst(): WSNet {
         if (null == WSNet._inst) {
@@ -22,20 +23,18 @@ class WSNet {
     private static _inst: WSNet;
 
     //websocket连接对象
-    private socket: egret.WebSocket;
+    private socket: Laya.Socket;
     //构造函数
     constructor() {
-        this.socket = new egret.WebSocket();
-        //设置websocket运行模式为字符串模式，方便进行json序列化
-        this.socket.type = egret.WebSocket.TYPE_STRING;
+        this.socket = new Laya.Socket();
         //添加收到消息响应
-        this.socket.addEventListener(egret.ProgressEvent.SOCKET_DATA, this.onReceive, this);
+        this.socket.on(Laya.Event.MESSAGE, this, this.onReceive);
         //添加连接成功响应
-        this.socket.addEventListener(egret.Event.CONNECT, this.onConnected, this);
+        this.socket.on(Laya.Event.OPEN, this, this.onConnected);
         //添加断开连接响应
-        this.socket.addEventListener(egret.Event.CLOSE, this.onDisconnected, this);
+        this.socket.on(Laya.Event.CLOSE, this, this.onDisconnected);
         //添加网络IO错误响应
-        this.socket.addEventListener(egret.IOErrorEvent.IO_ERROR, this.onError, this);
+        this.socket.on(Laya.Event.ERROR, this, this.onError);
     }
 
     //收到消息的回调
@@ -57,20 +56,20 @@ class WSNet {
     }
     //发送消息到服务器，这里会序列化为json
     public send(obj: any): void {
-        this.socket.writeUTF(JSON.stringify(obj))
+        this.socket.send(JSON.stringify(obj))
     }
 
     //连接成功
     private onConnected(): void {
-        egret.log("on connect");
+        console.log("on connect");
     }
     //断开连接
     private onDisconnected(): void {
-        egret.log("on disconnect")
+        console.log("on disconnect")
     }
     //收到消息，这里会将收到的消息当作json文本并转换为对象提交给之前设置的收到消息的回调中去
-    private onReceive(e: egret.Event): void {
-        var jsonStr = this.socket.readUTF();
+    private onReceive(message:any): void {
+        var jsonStr = message
         if (null == this.receiveCallback) {
             return;
         }
@@ -79,7 +78,7 @@ class WSNet {
     }
     //错误处理
     private onError(): void {
-        egret.log("on error")
+        console.log("on error")
     }
 }
 ```
