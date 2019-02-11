@@ -19,6 +19,7 @@ description: > # this means to ignore newlines until "baseurl:"
   记录一些我自己会的东西，免得以后忘记了
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://mingsailor.com/" # the base hostname & protocol for your site, e.g. http://example.com
+enforce_ssl: mingsailor.com
 # twitter_username: MingSailor
 github_username:  sunny352
 
