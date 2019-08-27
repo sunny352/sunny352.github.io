@@ -1,5 +1,61 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://0.0.0.0:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://0.0.0.0:4000/" rel="alternate" type="text/html" /><updated>2019-03-26T04:28:35-05:00</updated><id>http://0.0.0.0:4000/feed.xml</id><title type="html">小明的记录</title><subtitle>记录一些我自己会的东西，免得以后忘记了
-</subtitle><entry><title type="html">http 实例：Egret 使用typescript</title><link href="http://0.0.0.0:4000/2019/02/26/http-egret-typescript.html" rel="alternate" type="text/html" title="http 实例：Egret 使用typescript" /><published>2019-02-26T06:45:20-06:00</published><updated>2019-02-26T06:45:20-06:00</updated><id>http://0.0.0.0:4000/2019/02/26/http-egret-typescript</id><content type="html" xml:base="http://0.0.0.0:4000/2019/02/26/http-egret-typescript.html">&lt;!-- # http 实例：Egret 使用typescript --&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://0.0.0.0:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://0.0.0.0:4000/" rel="alternate" type="text/html" /><updated>2019-08-27T08:15:24-05:00</updated><id>http://0.0.0.0:4000/feed.xml</id><title type="html">小明的记录</title><subtitle>记录一些我自己会的东西，免得以后忘记了
+</subtitle><entry><title type="html">在 Unity 中处理 json</title><link href="http://0.0.0.0:4000/2019/08/27/unity-DataContract.html" rel="alternate" type="text/html" title="在 Unity 中处理 json" /><published>2019-08-27T07:49:13-05:00</published><updated>2019-08-27T07:49:13-05:00</updated><id>http://0.0.0.0:4000/2019/08/27/unity-DataContract</id><content type="html" xml:base="http://0.0.0.0:4000/2019/08/27/unity-DataContract.html">&lt;!-- # 在 Unity 中处理 json --&gt;
+&lt;h2 id=&quot;unity-中处理json的方式&quot;&gt;Unity 中处理Json的方式&lt;/h2&gt;
+
+&lt;h3 id=&quot;unityenginejsonutility&quot;&gt;UnityEngine.JsonUtility&lt;/h3&gt;
+&lt;p&gt;这个是 Unity 自带的 Json处理方式&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-C#&quot;&gt;// 将 obj 转换成 json
+var jsonString = JsonUtility.ToJson(obj, true);
+
+// 将 json 转换成 obj，T 为 obj 的类型
+var obj = JsonUtility.FromJson&amp;lt;T&amp;gt;(jsonString);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;但这个方式有很大的局限性，就是无法处理 Dictionary 和 Array&lt;/p&gt;
+
+&lt;h3 id=&quot;systemruntimeserializationjson&quot;&gt;System.Runtime.Serialization.Json&lt;/h3&gt;
+&lt;p&gt;这个是 .net 中的序列化库，要求 Unity 开启 .net4.x 支持&lt;/p&gt;
+
+&lt;p&gt;为了方便使用，对这个库进行了一下简单的封装&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-C#&quot;&gt;public static class Json
+{
+    public static T FromJson&amp;lt;T&amp;gt;(string json) where T : class
+    {
+        using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(json)))
+        {
+            var jsonSerializer = new DataContractJsonSerializer(typeof(T));
+            return jsonSerializer.ReadObject(stream) as T;
+        }
+    }
+
+    public static string ToJson&amp;lt;T&amp;gt;(T obj)
+    {
+        using (var stream = new MemoryStream())
+        {
+            var jsonSerializer = new DataContractJsonSerializer(typeof(T));
+            jsonSerializer.WriteObject(stream, obj);
+            return Encoding.UTF8.GetString(stream.ToArray());
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;这个类使用方式类似 Unity 的 JsonUtility&lt;/p&gt;
+
+&lt;h4 id=&quot;使用这种方式需要注意&quot;&gt;使用这种方式需要注意&lt;/h4&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;首先，需要开启 .net4.x 支持&lt;/li&gt;
+  &lt;li&gt;在移动平台上（iOS/Android）打包的时候，如果开启了 [&lt;em&gt;Strip Engine Code&lt;/em&gt;] 选项，这个库可能会被优化掉，需要强制 link [System.Runtime.Serialization] 这个库，原因在&lt;a href=&quot;https://issuetracker.unity3d.com/issues/system-dot-configuration-dot-configurationerrorsexception-failed-to-load-configuration-section-for-datacontractserializer&quot;&gt;【这里】&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;&amp;lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;linker&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;assembly&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;fullname=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;System.Runtime.Serialization&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;preserve=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;all&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/linker&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><category term="unity" /><category term="json" /><category term="Serialization" /><summary type="html">Unity 中处理Json的方式</summary></entry><entry><title type="html">http 实例：Egret 使用typescript</title><link href="http://0.0.0.0:4000/2019/02/26/http-egret-typescript.html" rel="alternate" type="text/html" title="http 实例：Egret 使用typescript" /><published>2019-02-26T06:45:20-06:00</published><updated>2019-02-26T06:45:20-06:00</updated><id>http://0.0.0.0:4000/2019/02/26/http-egret-typescript</id><content type="html" xml:base="http://0.0.0.0:4000/2019/02/26/http-egret-typescript.html">&lt;!-- # http 实例：Egret 使用typescript --&gt;
 
 &lt;p&gt;这个是使用egret引擎进行http访问的封装&lt;br /&gt;&lt;/p&gt;
 &lt;blockquote&gt;
